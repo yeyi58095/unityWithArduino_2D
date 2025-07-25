@@ -7,11 +7,16 @@ public class FirstArm : MonoBehaviour {
 
     void Start() {
         // 計算半徑（Cylinder 高度的一半）
-        radius = GetComponent<CapsuleCollider>().height * 0.5f;
+        //radius = GetComponent<CapsuleCollider>().height * 0.5f;
+        //radius = transform.localScale.y;
+        radius = (GetComponent<CapsuleCollider>().height * 0.5f) * transform.localScale.y;// 綜合了 CapsuleCollider 的高度和物體的縮放比例
+
         transform.position = new Vector3(radius, 0f, 0f); // 初始位置
     }
 
     void Update() {
+        radius = (GetComponent<CapsuleCollider>().height * 0.5f) * transform.localScale.y;
+
         float input = 0f;
         if (Input.GetKey(KeyCode.W)) {
             input = -1f;
@@ -20,7 +25,7 @@ public class FirstArm : MonoBehaviour {
         }
 
         // 更新角度
-        currentAngle += input * rotateSpeed * Time.deltaTime ;
+        currentAngle += input * rotateSpeed * Time.deltaTime;
 
         // 計算新位置 (以原點為圓心繞Z軸旋轉)
         float rad = currentAngle * Mathf.Deg2Rad;
