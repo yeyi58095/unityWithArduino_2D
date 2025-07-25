@@ -33,6 +33,6 @@ public class FirstArm : MonoBehaviour {
 
         // 設定朝向 (讓物體朝著圓心外的方向)
         transform.rotation = Quaternion.Euler(0f, 0f, currentAngle + 90f);
-        Debug.Log(currentAngle);
+        // Debug.Log(currentAngle);
     }
 }
