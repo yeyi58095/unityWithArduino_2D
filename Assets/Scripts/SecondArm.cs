@@ -1,26 +1,37 @@
+
 using UnityEngine;
 
 public class SecondArm : MonoBehaviour {
     public Transform firstArm;     // 參考第一節手臂
     public float moveSpeed = 2f;   // 每秒伸縮速度
-    public float maxLength = 0.5f;   // 最大伸長距離
-    
-    
-    /* debug mode */
+    public float maxLength = 0.5f; // 最大伸長距離
+
     private float currentLength = 0f;
-    private Vector3 initialLocalPos;
+    private float input;
 
     void Start() {
-        initialLocalPos = transform.localPosition;  // 記住初始位置
-       // float firstArmLength = firstArm.GetComponent<MeshRenderer>().bounds.size.y;
-        //maxLength = firstArmLength / 4f;
+        // 訂閱 SerialManager 事件
+        if (SerialManager.Instance != null)
+            SerialManager.Instance.OnCommandReceived += HandleCommand;
+    }
+
+    void OnDestroy() {
+        if (SerialManager.Instance != null)
+            SerialManager.Instance.OnCommandReceived -= HandleCommand;
+    }
+
+    void HandleCommand(string command) {
+        if (command == "D") {
+            input = 1f;
+        } else if (command == "A") {
+            input = -1f;
+        } else {
+            input = 0f;
+        }
     }
 
     void Update() {
-        string command = SerialManager.Instance.ReadCommand();
-        float input = 0f;
-        if (command == "D") input = 1f;
-        else if (command == "A") input = -1f;
+        
 
         if (currentLength <= 1f) {
             currentLength += input * moveSpeed * Time.deltaTime;

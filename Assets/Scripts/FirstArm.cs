@@ -1,24 +1,27 @@
 using UnityEngine;
+using UnityEngine.Windows;
 
 public class FirstArm : MonoBehaviour {
-    public float rotateSpeed = 30f;  // 每秒旋轉速度 (度/秒)
-    private float currentAngle = -180f; // 當前旋轉角度（0 表示水平）
-    private float radius;
-    float input;
-    void Start() {
-        // 計算半徑（Cylinder 高度的一半）
-        //radius = GetComponent<CapsuleCollider>().height * 0.5f;
-        //radius = transform.localScale.y;
-        radius = (GetComponent<CapsuleCollider>().height * 0.5f) * transform.localScale.y;// 綜合了 CapsuleCollider 的高度和物體的縮放比例
-        transform.position = new Vector3(radius, 0f, 0f); // 初始位置
+    public float rotateSpeed = 30f;
+    private float currentAngle = -180f;
+    float input = 0f;
+    void OnEnable() {
+        if (SerialManager.Instance != null)
+            SerialManager.Instance.OnCommandReceived += HandleCommand;
     }
 
-    void Update() {
-        radius = (GetComponent<CapsuleCollider>().height * 0.5f) * transform.localScale.y;
-        string commend = SerialManager.Instance.ReadCommand();
+    void OnDisable() {
+        if (SerialManager.Instance != null)
+            SerialManager.Instance.OnCommandReceived -= HandleCommand;
+    }
+
+    void HandleCommand(string commend) {
+
+        float radius = (GetComponent<CapsuleCollider>().height * 0.5f) * transform.localScale.y;
+
         input = 0f;
 
-        Debug.Log("Command received: " + commend);  
+        Debug.Log("Command received: " + commend);
         if (commend == "W") {
             input = -1f;
         } else if (commend == "S") {

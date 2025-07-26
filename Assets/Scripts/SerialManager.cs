@@ -1,13 +1,17 @@
 using UnityEngine;
 using System.IO.Ports;
+using System;
 
 public class SerialManager : MonoBehaviour {
-    public static SerialManager Instance; // 單例模式
+    public static SerialManager Instance;
     private SerialPort serialPort;
 
     [Header("Serial Port Settings")]
-    public string portName = "COM5"; // 你的 Arduino COM port
+    public string portName = "COM3";
     public int baudRate = 9600;
+
+    // 事件：當有新指令時觸發
+    public event Action<string> OnCommandReceived;
 
     void Awake() {
         if (Instance == null) {
@@ -22,28 +26,23 @@ public class SerialManager : MonoBehaviour {
         try {
             serialPort.Open();
             Debug.Log("Serial port opened: " + portName);
-        } catch (System.Exception e) {
+        } catch (Exception e) {
             Debug.LogError("Failed to open serial port: " + e.Message);
+        }
+    }
+
+    void Update() {
+        if (serialPort != null && serialPort.IsOpen && serialPort.BytesToRead > 0) {
+            try {
+                string cmd = serialPort.ReadLine().Trim();
+                Debug.Log("Serial Command from Manager: " + cmd);
+                OnCommandReceived?.Invoke(cmd); // 廣播給訂閱者
+            } catch { }
         }
     }
 
     void OnApplicationQuit() {
         if (serialPort != null && serialPort.IsOpen)
             serialPort.Close();
-    }
-
-    public string ReadCommand() {
-        if (serialPort != null && serialPort.IsOpen && serialPort.BytesToRead > 0) {
-            try {
-                return serialPort.ReadLine().Trim();
-            } catch { }
-        }
-        return null;
-    }
-
-    public void SendCommand(string cmd) {
-        if (serialPort != null && serialPort.IsOpen) {
-            serialPort.WriteLine(cmd);
-        }
     }
 }
