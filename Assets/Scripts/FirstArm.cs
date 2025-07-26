@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Windows;
 
 public class FirstArm : MonoBehaviour {
-    public float rotateSpeed = 30f;
+    public float rotateSpeed = 100f;
     private float currentAngle = -180f;
     float input = 0f;
     void OnEnable() {

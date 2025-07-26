@@ -35,10 +35,17 @@ public class SerialManager : MonoBehaviour {
         if (serialPort != null && serialPort.IsOpen && serialPort.BytesToRead > 0) {
             try {
                 string cmd = serialPort.ReadLine().Trim();
-                Debug.Log("Serial Command from Manager: " + cmd);
+                //Debug.Log("Serial Command from Manager: " + cmd);
                 OnCommandReceived?.Invoke(cmd); // ¼s¼½µ¹­q¾\ªÌ
             } catch { }
         }
+
+
+        // debug mode for only keyboard input  
+        if (Input.GetKey(KeyCode.W)) OnCommandReceived?.Invoke("W");
+        if (Input.GetKey(KeyCode.S)) OnCommandReceived?.Invoke("S");
+        if (Input.GetKey(KeyCode.A)) OnCommandReceived?.Invoke("A");
+        if (Input.GetKey(KeyCode.D)) OnCommandReceived?.Invoke("D");
     }
 
     void OnApplicationQuit() {
