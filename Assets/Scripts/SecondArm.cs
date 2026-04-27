@@ -49,8 +49,8 @@ public class SecondArm : MonoBehaviour {
         transform.localPosition =
             initialLocalPosition + localMoveDirection.normalized * currentLength;
 
-        Debug.Log(
-            $"[X Axis] encoder={encoderCount}, t={t:F3}, localPos={transform.localPosition}"
-        );
+        //Debug.Log(
+        //    $"[X Axis] encoder={encoderCount}, t={t:F3}, localPos={transform.localPosition}"
+        //);
     }
 }

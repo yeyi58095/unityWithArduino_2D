@@ -9,52 +9,86 @@ public class HapticObject : MonoBehaviour {
     public bool showDebug = true;
 
     private bool isColliding = false;
+    private char currentAxis = 'N';
 
-    void OnCollisionEnter(Collision collision) {
-        HandleCollision(collision, "ENTER");
+    void OnTriggerEnter(Collider other) {
+        if (!IsArmObject(other)) return;
+        if (isColliding) return;
+
+        char detectedAxis = GetDetectedAxis();
+
+        if (detectedAxis == 'N') {
+            Debug.LogWarning("Collision detected, but active axis is unknown.");
+            return;
+        }
+
+        isColliding = true;
+        currentAxis = detectedAxis;
+
+        int positionValue = GetCurrentAxisValue(currentAxis);
+        int espInt = Mathf.RoundToInt(elasticCoefficient * 10f);
+
+        string msg = $"C,{currentAxis},{positionValue},{espInt}";
+
+        if (showDebug) {
+            Debug.Log(msg);
+        }
+
+        SendToArduino(msg);
     }
 
-    void OnCollisionStay(Collision collision) {
-        HandleCollision(collision, "STAY");
+    void OnTriggerStay(Collider other) {
+        // Keep the first collision data.
     }
 
-    void OnCollisionExit(Collision collision) {
-        ArmCollisionTag armTag = collision.gameObject.GetComponent<ArmCollisionTag>();
-
-        if (armTag == null) return;
+    void OnTriggerExit(Collider other) {
+        if (!IsArmObject(other)) return;
+        if (!isColliding) return;
 
         isColliding = false;
 
+        string msg = $"R,{currentAxis}";
+
         if (showDebug) {
-            Debug.Log(
-                $"[HAPTIC RELEASE] " +
-                $"Axis={armTag.axis}, " +
-                $"Object={gameObject.name}, " +
-                $"Collision Released"
-            );
+            Debug.Log(msg);
         }
+
+        SendToArduino(msg);
+
+        currentAxis = 'N';
     }
 
-    void HandleCollision(Collision collision, string state) {
-        ArmCollisionTag armTag = collision.gameObject.GetComponent<ArmCollisionTag>();
+    bool IsArmObject(Collider other) {
+        return other.GetComponent<ArmCollisionTag>() != null;
+    }
 
-        if (armTag == null) return;
+    char GetDetectedAxis() {
+        if (SerialManager.Instance == null) {
+            return 'N';
+        }
 
-        isColliding = true;
+        return SerialManager.Instance.GetCurrentActiveAxis();
+    }
 
-        ContactPoint contact = collision.contacts[0];
-        Vector3 contactPoint = contact.point;
+    int GetCurrentAxisValue(char axis) {
+        if (SerialManager.Instance == null) {
+            return 0;
+        }
 
-        float collisionAngle = Mathf.Atan2(contactPoint.y, contactPoint.x) * Mathf.Rad2Deg;
+        if (axis == 'X') {
+            return Mathf.RoundToInt(SerialManager.Instance.GetCurrentXValue());
+        }
 
-        if (showDebug) {
-            Debug.Log(
-                $"[HAPTIC COLLISION {state}] " +
-                $"Axis={armTag.axis}, " +
-                $"Object={gameObject.name}, " +
-                $"ElasticCoefficient={elasticCoefficient:F2}, " +
-                $"CollisionAngle={collisionAngle:F2} deg"
-            );
+        if (axis == 'Y') {
+            return Mathf.RoundToInt(SerialManager.Instance.GetCurrentYValue());
+        }
+
+        return 0;
+    }
+
+    void SendToArduino(string msg) {
+        if (SerialManager.Instance != null) {
+            SerialManager.Instance.SendData(msg);
         }
     }
 }
