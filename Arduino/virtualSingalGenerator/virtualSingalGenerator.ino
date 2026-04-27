@@ -1,4 +1,4 @@
-int value = -1000;   // 起始值
+/*int value = 0;   // 起始值
 int step = 10;       // 每次變化量（可以調整速度）
 
 void setup() {
@@ -20,4 +20,30 @@ void loop() {
   }
 
   delay(20); // 控制傳送速度（越小越快）
+}*/
+
+int value = 0;
+int step = 10;
+
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  Serial.print(value);
+  Serial.println("X");
+
+  value += step;
+
+  if (value >= 3072) {
+    value = 3072;
+    step = -step;
+  }
+
+  if (value <= 0) {
+    value = 0;
+    step = -step;
+  }
+
+  delay(20);
 }
