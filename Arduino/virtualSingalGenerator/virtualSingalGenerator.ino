@@ -22,7 +22,7 @@ void loop() {
   delay(20); // 控制傳送速度（越小越快）
 }*/
 
-int value = 0;
+/*int value = 0;
 int step = 10;
 
 void setup() {
@@ -43,6 +43,48 @@ void loop() {
   if (value <= 0) {
     value = 0;
     step = -step;
+  }
+
+  delay(20);
+}*/
+
+int xValue = 0;
+int xStep = 10;
+
+int yValue = -1000;
+int yStep = 10;
+
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  Serial.print(xValue);
+  Serial.print("X,");
+  Serial.print(yValue);
+  Serial.println("Y");
+
+  xValue += xStep;
+  yValue += yStep;
+
+  if (xValue >= 3072) {
+    xValue = 3072;
+    xStep = -xStep;
+  }
+
+  if (xValue <= 0) {
+    xValue = 0;
+    xStep = -xStep;
+  }
+
+  if (yValue >= 1000) {
+    yValue = 1000;
+    yStep = -yStep;
+  }
+
+  if (yValue <= -1000) {
+    yValue = -1000;
+    yStep = -yStep;
   }
 
   delay(20);

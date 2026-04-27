@@ -48,16 +48,25 @@ public class SerialManager : MonoBehaviour {
     }
 
     void ParseMotorData(string data) {
-        if (string.IsNullOrEmpty(data) || data.Length < 2) return;
+        if (string.IsNullOrEmpty(data)) return;
 
-        char axis = data[data.Length - 1];
-        string valueText = data.Substring(0, data.Length - 1);
+        // ¤À³Î¡G1234X,456Y
+        string[] parts = data.Split(',');
 
-        if (float.TryParse(valueText, out float angle)) {
-            Debug.Log($"Motor Data: axis={axis}, angle={angle}");
-            OnMotorDataReceived?.Invoke(axis, angle);
-        } else {
-            Debug.LogWarning("Invalid motor data: " + data);
+        foreach (string part in parts) {
+            string p = part.Trim();
+
+            if (p.Length < 2) continue;
+
+            char axis = p[p.Length - 1];
+            string valueText = p.Substring(0, p.Length - 1);
+
+            if (float.TryParse(valueText, out float value)) {
+                Debug.Log($"[Serial] axis={axis}, value={value}");
+                OnMotorDataReceived?.Invoke(axis, value);
+            } else {
+                Debug.LogWarning("Invalid part: " + p);
+            }
         }
     }
 
