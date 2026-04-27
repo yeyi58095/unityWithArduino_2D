@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class SecondArm : MonoBehaviour {
     public Transform firstArm;     // 參考第一節手臂
-    public float moveSpeed = 2f;   // 每秒伸縮速度
+    public float moveSpeed = 0.01f;   // 每秒伸縮速度
     public float maxLength = 0.5f; // 最大伸長距離
 
     private float currentLength = 0f;

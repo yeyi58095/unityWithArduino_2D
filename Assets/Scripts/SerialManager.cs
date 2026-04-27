@@ -7,7 +7,7 @@ public class SerialManager : MonoBehaviour {
     private SerialPort serialPort;
 
     [Header("Serial Port Settings")]
-    public string portName = "COM3";
+    string portName = "COM3";
     public int baudRate = 9600;
 
     // 事件：當有新指令時觸發
