@@ -7,11 +7,10 @@ public class SerialManager : MonoBehaviour {
     private SerialPort serialPort;
 
     [Header("Serial Port Settings")]
-    string portName = "COM3";
-    public int baudRate = 9600;
+    public string portName = "COM3";
+    public int baudRate = 115200;
 
-    // 事件：當有新指令時觸發
-    public event Action<string> OnCommandReceived;
+    public event Action<char, float> OnMotorDataReceived;
 
     void Awake() {
         if (Instance == null) {
@@ -23,6 +22,8 @@ public class SerialManager : MonoBehaviour {
         }
 
         serialPort = new SerialPort(portName, baudRate);
+        serialPort.ReadTimeout = 50;
+
         try {
             serialPort.Open();
             Debug.Log("Serial port opened: " + portName);
@@ -34,18 +35,30 @@ public class SerialManager : MonoBehaviour {
     void Update() {
         if (serialPort != null && serialPort.IsOpen && serialPort.BytesToRead > 0) {
             try {
-                string cmd = serialPort.ReadLine().Trim();
-                //Debug.Log("Serial Command from Manager: " + cmd);
-                OnCommandReceived?.Invoke(cmd); // 廣播給訂閱者
+                string data = serialPort.ReadLine().Trim();
+                ParseMotorData(data);
             } catch { }
         }
 
+        // Keyboard debug
+        if (Input.GetKey(KeyCode.W)) OnMotorDataReceived?.Invoke('Y', 90f);
+        if (Input.GetKey(KeyCode.S)) OnMotorDataReceived?.Invoke('Y', -90f);
+        if (Input.GetKey(KeyCode.D)) OnMotorDataReceived?.Invoke('X', 180f);
+        if (Input.GetKey(KeyCode.A)) OnMotorDataReceived?.Invoke('X', 0f);
+    }
 
-        // debug mode for only keyboard input  
-        if (Input.GetKey(KeyCode.W)) OnCommandReceived?.Invoke("W");
-        if (Input.GetKey(KeyCode.S)) OnCommandReceived?.Invoke("S");
-        if (Input.GetKey(KeyCode.A)) OnCommandReceived?.Invoke("A");
-        if (Input.GetKey(KeyCode.D)) OnCommandReceived?.Invoke("D");
+    void ParseMotorData(string data) {
+        if (string.IsNullOrEmpty(data) || data.Length < 2) return;
+
+        char axis = data[data.Length - 1];
+        string valueText = data.Substring(0, data.Length - 1);
+
+        if (float.TryParse(valueText, out float angle)) {
+            Debug.Log($"Motor Data: axis={axis}, angle={angle}");
+            OnMotorDataReceived?.Invoke(axis, angle);
+        } else {
+            Debug.LogWarning("Invalid motor data: " + data);
+        }
     }
 
     void OnApplicationQuit() {

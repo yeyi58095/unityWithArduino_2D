@@ -1,44 +1,30 @@
-
 using UnityEngine;
 
 public class SecondArm : MonoBehaviour {
-    public Transform firstArm;     // 參考第一節手臂
-    public float moveSpeed = 0.01f;   // 每秒伸縮速度
-    public float maxLength = 0.5f; // 最大伸長距離
+    public char controlAxis = 'X';
 
-    private float currentLength = 0f;
-    private float input;
+    public float minMotorAngle = 0f;
+    public float maxMotorAngle = 180f;
 
-    void Start() {
-        // 訂閱 SerialManager 事件
+    public float minLength = 0f;
+    public float maxLength = 1f;
+
+    void OnEnable() {
         if (SerialManager.Instance != null)
-            SerialManager.Instance.OnCommandReceived += HandleCommand;
+            SerialManager.Instance.OnMotorDataReceived += HandleMotorData;
     }
 
-    void OnDestroy() {
+    void OnDisable() {
         if (SerialManager.Instance != null)
-            SerialManager.Instance.OnCommandReceived -= HandleCommand;
+            SerialManager.Instance.OnMotorDataReceived -= HandleMotorData;
     }
 
-    void HandleCommand(string command) {
-        if (command == "D") {
-            input = 1f;
-        } else if (command == "A") {
-            input = -1f;
-        } else {
-            input = 0f;
-        }
-    }
+    void HandleMotorData(char axis, float motorAngle) {
+        if (axis != controlAxis) return;
 
-    void Update() {
-        
+        float t = Mathf.InverseLerp(minMotorAngle, maxMotorAngle, motorAngle);
+        float currentLength = Mathf.Lerp(minLength, maxLength, t);
 
-        if (currentLength <= 1f) {
-            currentLength += input * moveSpeed * Time.deltaTime;
-            currentLength = Mathf.Clamp(currentLength, 0f, 1f);
-        }
-        // 沿著第一節手臂的方向 (假設第一節的長軸是 X 軸)
-        //Vector3 dir = firstArm.TransformDirection(Vector3.right);
         transform.localPosition = new Vector3(0f, -currentLength, 0f);
     }
 }
